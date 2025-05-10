@@ -256,6 +256,7 @@ include_once("includes/head.php");
                                 <input type="hidden" name="product_item" value="<?php echo $_SESSION['cart_pdt_number'] ?>">
                                 <input type="hidden" name="amount" value="<?php echo $_SESSION['subtotal'] ?>">
                                 <input type="hidden" name="order_status" value="0">
+                                <input type="hidden" id="afterdiscount_input" name="afterdiscount" value="<?php echo $_SESSION['subtotal']; ?>">
                                
 
 
@@ -400,6 +401,7 @@ include_once("includes/head.php");
 
                         var html = Math.round(data);
                         discount.text(html);
+                        updateAfterDiscount();
                     }
                 })
 
@@ -411,45 +413,16 @@ include_once("includes/head.php");
             });
 
             $("#quantity").change(function(){
-                var cupon_code = $("#cupon");
-
-            var discount = $("#discount");
-            var total_price = parseInt($("#totalOfall").text());
-
-                $("#afterdiscount").text(total_price);
-              
-           
-            $(cupon_code).on("keyup keydown keypress blur", function() {
-
-
-                // alert (cupon_code.val());
-
-                $.ajax({
-                    url: "json/coupon.php",
-                    method: "POST",
-                    data: {
-                        action: 'load_discount',
-                        cupon: cupon_code.val(),
-                        price: total_price
-                    },
-                    success: function(data) {
-
-                        var html = Math.round(data);
-                        discount.text(html);
-                    }
-                })
-
-              
-                    $("#afterdiscount").text(total_price - parseInt(discount.text()));
-                
-
-
+                updateAfterDiscount();
             });
-            })
 
-
-
-
+            function updateAfterDiscount() {
+                var total_price = parseInt($("#totalOfall").text());
+                var discount_val = parseInt($("#discount").text()) || 0;
+                var after = total_price - discount_val;
+                $("#afterdiscount").text(after);
+                $("#afterdiscount_input").val(after);
+            }
 
         })
     </script>

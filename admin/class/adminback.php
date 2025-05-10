@@ -536,7 +536,8 @@ class adminback
         $trans_id = $post['txid'];
         $mobile = $post['shipping_Mobile'];
         $shiping = $post['shiping'];
-        $coupon = $_POST['coupon'];
+        $coupon = isset($post['coupon']) ? trim($post['coupon']) : '';
+        $afterdiscount = isset($post['afterdiscount']) ? intval($post['afterdiscount']) : 0;
 
         foreach($session as $key){
             $pdt_name = $key['pdt_name'];
@@ -544,14 +545,14 @@ class adminback
             $pdt_id= $key['pdt_id'];
             $pdt_quantity=$key['quantity'];
 
-           $query= "INSERT INTO `order_details`(`user_id`, `product_name`,`pdt_quantity`, `amount`,`uses_coupon`, `order_status`, `trans_id`, `Shipping_mobile`, `shiping`, `order_time`) VALUES ($user_id,'$pdt_name',$pdt_quantity, $pdt_price,'$coupon', $order_status,'$trans_id','$mobile','$shiping',NOW())";
-           $result= mysqli_query($this->connection, $query);
-           unset($_SESSION['cart']);
-            header("location:exist_order.php");
-           
+            // Nếu có mã giảm giá và tổng sau giảm giá, dùng giá trị này cho amount
+            $amount = $afterdiscount > 0 ? $afterdiscount : $pdt_price;
 
+            $query= "INSERT INTO `order_details`(`user_id`, `product_name`,`pdt_quantity`, `amount`,`uses_coupon`, `order_status`, `trans_id`, `Shipping_mobile`, `shiping`, `order_time`) VALUES ($user_id,'$pdt_name',$pdt_quantity, $amount,'$coupon', $order_status,'$trans_id','$mobile','$shiping',NOW())";
+            $result= mysqli_query($this->connection, $query);
         }
-
+        unset($_SESSION['cart']);
+        header("location:exist_order.php");
     }
 
     function order_details_by_id($user_id)
@@ -870,5 +871,15 @@ class adminback
             $result = mysqli_query($this->connection, $query);
             return $result;
         }
+    }
+
+    public function get_coupon_by_code($code) {
+        $conn = $this->connection;
+        $sql = "SELECT * FROM cupon WHERE cupon_code='$code' AND status=1 LIMIT 1";
+        $result = mysqli_query($conn, $sql);
+        if ($result && mysqli_num_rows($result) > 0) {
+            return mysqli_fetch_assoc($result);
+        }
+        return false;
     }
 }

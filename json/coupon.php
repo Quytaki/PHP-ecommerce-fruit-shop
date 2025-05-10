@@ -1,35 +1,17 @@
-<?php 
- $dbhost = "localhost";
- $dbuser = "root";
- $dbpass = "";
- $dbname = "ecommerce";
+<?php
+session_start();
+include_once("../admin/class/adminback.php");
+$obj = new adminback();
 
- $connection = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
+if ($_POST['action'] == 'load_discount') {
+    $cupon_code = $_POST['cupon'];
+    $price = intval($_POST['price']);
+    $discount = 0;
 
- if(isset($_POST['action'])){
-    if($_POST['action']=='load_discount'){
-        $coupon_code = $_POST['cupon'];
-        $price = $_POST['price'];
-        $query = "SELECT * FROM `cupon` WHERE `cupon_code`='$coupon_code' AND `status`=1";
-
-        if(mysqli_query($connection, $query)){
-            $result = mysqli_query($connection, $query);
-
-            $discount = 0;
-            foreach($result as $res){
-                $discount = $res['discount'];
-            }
-            
-            $dis = ($price * $discount/100);
-            echo $dis;
-        }else{
-            echo 0;
-        }
-
+    $cupon_info = $obj->get_coupon_by_code($cupon_code);
+    if ($cupon_info && $cupon_info['status'] == 1) {
+        $discount = round($price * $cupon_info['discount'] / 100);
     }
- }
-
-
-
-
+    echo $discount;
+}
 ?>
