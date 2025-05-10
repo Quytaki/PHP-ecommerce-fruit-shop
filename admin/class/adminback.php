@@ -17,6 +17,10 @@ class adminback
         }
     }
 
+    public function get_connection() {
+        return $this->connection;
+    }
+
     function admin_login($data)
     {
         $admin_email = $data["admin_email"];
@@ -881,5 +885,10 @@ class adminback
             return mysqli_fetch_assoc($result);
         }
         return false;
+    }
+
+    function delete_coupon($id) {
+        $query = "DELETE FROM `cupon` WHERE cupon_id = $id";
+        mysqli_query($this->connection, $query);
     }
 }
